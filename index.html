@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatório Amorinha Sorvetes e Açaí</title>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/react.production.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/recharts/2.10.0/Recharts.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes pulse {
+            0%, 100% {
+                box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7);
+            }
+            50% {
+                box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
+            }
+        }
+
+        @keyframes glow {
+            0%, 100% {
+                box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3), 0 0 30px rgba(236, 72, 153, 0.2);
+            }
+            50% {
+                box-shadow: 0 4px 30px rgba(59, 130, 246, 0.5), 0 0 50px rgba(236, 72, 153, 0.4);
+            }
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-8px);
+            }
+        }
+
+        .pulse-on-hover:hover {
+            animation: pulse 2s infinite;
+        }
+
+        .glow-card:hover {
+            animation: glow 2s infinite;
+        }
+
+        .float-on-hover:hover {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .scale-on-hover:hover {
+            transform: scale(1.02);
+            transition: transform 0.3s ease;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+        const { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } = Recharts;
+
+        function RelatoriAmorinha() {
+            const [activeTab, setActiveTab] = useState('overview');
+            const [hoveredCard, setHoveredCard] = useState(null);
+
+            // Dados
+            const horaData = [
+                { hora: '03h', impressoes: 722, alcance: 512 },
+                { hora: '06h', impressoes: 845, alcance: 598 },
+                { hora: '09h', impressoes: 1240, alcance: 892 },
+                { hora: '12h', impressoes: 3156, alcance: 2145 },
+                { hora: '15h', impressoes: 4892, alcance: 3421 },
+                { hora: '18h', impressoes: 8945, alcance: 6234 },
+                { hora: '19h', impressoes: 11307, alcance: 9184 },
+                { hora: '20h', impressoes: 9156, alcance: 7342 },
+                { hora: '21h', impressoes: 6234, alcance: 4567 },
+                { hora: '00h', impressoes: 2340, alcance: 1458 },
+            ];
+
+            const idadeData = [
+                { faixa: '18-24', impressoes: 33639, alcance: 18234 },
+                { faixa: '25-34', impressoes: 39045, alcance: 21567 },
+                { faixa: '35-44', impressoes: 22145, alcance: 8945 },
+                { faixa: '45-54', impressoes: 9234, alcance: 1567 },
+                { faixa: '55+', impressoes: 4650, alcance: 901 },
+            ];
+
+            const generoData = [
+                { nome: 'Feminino', impressoes: 67689, alcance: 31260, fill: '#EC4899' },
+                { nome: 'Masculino', impressoes: 41024, alcance: 19954, fill: '#3B82F6' },
+            ];
+
+            const regiaoData = [
+                { nome: 'Minas Gerais', impressoes: 54772, alcance: 22997, cpf: 6.23 },
+                { nome: 'Goiás', impressoes: 32622, alcance: 16554, cpf: 6.13 },
+                { nome: 'Mato Grosso do Sul', impressoes: 18256, alcance: 11856, cpf: 5.36 },
+                { nome: 'Mato Grosso', impressoes: 2097, alcance: 1406, cpf: 5.30 },
+            ];
+
+            const campanhas = [
+                { nome: 'Impulsionar - Sorteio Campina Verde', resultado: 107, valor: 41.41, cpc: 0.62, cpm: 5.23 },
+                { nome: '[Trafego] - Chapadão do Sul', resultado: 82, valor: 34.97, cpc: 0.38, cpm: 4.60 },
+                { nome: 'OFERTA CIMENTO IMPERDÍVEL NA AMR!', resultado: 82, valor: 44.81, cpc: 0.61, cpm: 5.53 },
+                { nome: 'Impulsionar - AMR', resultado: 61, valor: 22.55, cpc: 0.37, cpm: 7.47 },
+            ];
+
+            const KPICard = ({ icon, label, value, sublabel, color }) => (
+                <div 
+                    className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-300 scale-on-hover glow-card cursor-pointer"
+                    onMouseEnter={() => setHoveredCard(label)}
+                    onMouseLeave={() => setHoveredCard(null)}
+                >
+                    <div className="flex items-start justify-between">
+                        <div>
+                            <p className="text-gray-500 text-sm font-medium mb-2">{label}</p>
+                            <p className={`text-3xl font-bold ${color}`}>{value}</p>
+                            {sublabel && <p className="text-gray-400 text-xs mt-1">{sublabel}</p>}
+                        </div>
+                        <div className={`text-4xl ${color} opacity-20 transition-all duration-300 ${hoveredCard === label ? 'scale-110 opacity-30' : ''}`}>
+                            {icon}
+                        </div>
+                    </div>
+                </div>
+            );
+
+            return (
+                <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-pink-50">
+                    {/* Header */}
+                    <header className="bg-white border-b border-gray-100 sticky top-0 z-10 shadow-sm">
+                        <div className="max-w-7xl mx-auto px-6 py-6">
+                            <div className="flex items-center justify-between gap-6">
+                                <div className="flex items-center gap-4 flex-shrink-0">
+                                    <div className="float-on-hover">
+                                        <svg width="48" height="48" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                                            <circle cx="50" cy="50" r="45" fill="none" stroke="#2D1B4E" strokeWidth="6"/>
+                                            <circle cx="30" cy="25" r="4" fill="#E07856"/>
+                                            <circle cx="50" cy="15" r="4" fill="#E07856"/>
+                                            <circle cx="70" cy="25" r="4" fill="#E07856"/>
+                                            <circle cx="80" cy="45" r="4" fill="#E07856"/>
+                                            <circle cx="75" cy="70" r="4" fill="#E07856"/>
+                                            <circle cx="50" cy="80" r="4" fill="#E07856"/>
+                                            <circle cx="25" cy="75" r="4" fill="#E07856"/>
+                                            <circle cx="15" cy="50" r="4" fill="#E07856"/>
+                                            <circle cx="20" cy="30" r="4" fill="#E07856"/>
+                                            <g transform="translate(50, 35)">
+                                                <circle cx="-8" cy="0" r="5" fill="#5B3A7D"/>
+                                                <circle cx="0" cy="-5" r="5" fill="#5B3A7D"/>
+                                                <circle cx="8" cy="0" r="5" fill="#5B3A7D"/>
+                                                <circle cx="0" cy="8" r="5" fill="#5B3A7D"/>
+                                                <circle cx="-6" cy="-8" r="4" fill="#7B4FB5"/>
+                                                <circle cx="6" cy="-8" r="4" fill="#7B4FB5"/>
+                                                <circle cx="-10" cy="5" r="4" fill="#7B4FB5"/>
+                                                <circle cx="10" cy="5" r="4" fill="#7B4FB5"/>
+                                                <path d="M -5,-15 Q 0,-18 5,-15" stroke="#3FB89F" strokeWidth="1.5" fill="none"/>
+                                            </g>
+                                        </svg>
+                                    </div>
+                                    <div className="border-l border-gray-200 pl-4">
+                                        <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                                            Amorinha
+                                        </h1>
+                                        <p className="text-xs text-gray-500">Sorvetes e Açaí</p>
+                                    </div>
+                                </div>
+
+                                <div className="text-right">
+                                    <p className="text-2xl font-bold text-purple-600">R$ 656,61</p>
+                                    <p className="text-gray-500 text-sm">Investimento Total</p>
+                                </div>
+                            </div>
+                        </div>
+                    </header>
+
+                    {/* Navegação */}
+                    <div className="bg-white border-b border-gray-100">
+                        <div className="max-w-7xl mx-auto px-6">
+                            <div className="flex gap-8">
+                                {['overview', 'performance', 'campanhas', 'regioes'].map((tab) => (
+                                    <button
+                                        key={tab}
+                                        onClick={() => setActiveTab(tab)}
+                                        className={`py-4 px-2 text-sm font-medium border-b-2 transition-all duration-300 ${
+                                            activeTab === tab
+                                                ? 'border-purple-600 text-purple-600 scale-105 pulse-on-hover'
+                                                : 'border-transparent text-gray-600 hover:text-gray-900 hover:scale-105'
+                                        }`}
+                                    >
+                                        {tab === 'overview' && 'Visão Geral'}
+                                        {tab === 'performance' && 'Performance'}
+                                        {tab === 'campanhas' && 'Campanhas'}
+                                        {tab === 'regioes' && 'Regiões'}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Conteúdo */}
+                    <main className="max-w-7xl mx-auto px-6 py-12">
+                        {/* Overview */}
+                        {activeTab === 'overview' && (
+                            <div className="space-y-8">
+                                <div className="bg-gradient-to-r from-amber-50 to-orange-50 border-l-4 border-amber-400 p-6 rounded-lg hover:shadow-lg transition-all duration-300 scale-on-hover glow-card">
+                                    <h3 className="text-lg font-bold text-gray-900 mb-2">⚠️ Padrão Crítico: Concentração de Entrega</h3>
+                                    <p className="text-gray-700 text-sm leading-relaxed">
+                                        O pico de entrega ocorre entre <strong>18h–20h</strong> (11.307 impressões às 19h), enquanto o restante do dia opera com volume bem menor. Qualquer desalinhamento de criativo ou resposta do WhatsApp nesse horário afeta significativamente o resultado.
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <h2 className="text-2xl font-bold text-gray-900 mb-6">Métricas Principais</h2>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                        <KPICard icon="👁️" label="Impressões" value="108.713" color="text-blue-600" />
+                                        <KPICard icon="👥" label="Alcance Total" value="51.214" color="text-pink-600" />
+                                        <KPICard icon="🎯" label="Cliques no Link" value="1.019" sublabel="CTR: 0,94%" color="text-green-600" />
+                                        <KPICard icon="💰" label="CPC Médio" value="R$ 0,64" sublabel="CPM: R$ 6,04" color="text-purple-600" />
+                                        <KPICard icon="💬" label="Conversas Iniciadas" value="94" sublabel="15 cadastros (leads)" color="text-indigo-600" />
+                                        <KPICard icon="📈" label="Frequência" value="2,12" sublabel="Impressões por pessoa" color="text-orange-600" />
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                    <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-300 scale-on-hover glow-card">
+                                        <h3 className="text-lg font-bold text-gray-900 mb-4">📊 Segmentação Demográfica</h3>
+                                        <div className="space-y-4">
+                                            <div>
+                                                <p className="text-sm font-medium text-gray-600 mb-2">Faixa Etária Principal</p>
+                                                <p className="text-xl font-bold text-gray-900">18-34 anos concentra 72.684 impressões</p>
+                                                <p className="text-sm text-gray-500 mt-1">Representa 67% do volume total</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-300 scale-on-hover glow-card">
+                                        <h3 className="text-lg font-bold text-gray-900 mb-4">💡 Recomendações Estratégicas</h3>
+                                        <ol className="space-y-3">
+                                            <li className="flex gap-3 group">
+                                                <span className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-sm font-bold group-hover:bg-blue-600 group-hover:text-white group-hover:scale-110 transition-all duration-300">1</span>
+                                                <span className="text-sm text-gray-700">Concentre orçamento no pico 18h-20h</span>
+                                            </li>
+                                            <li className="flex gap-3 group">
+                                                <span className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-sm font-bold group-hover:bg-blue-600 group-hover:text-white group-hover:scale-110 transition-all duration-300">2</span>
+                                                <span className="text-sm text-gray-700">Reforce peças para públicos 18-34</span>
+                                            </li>
+                                            <li className="flex gap-3 group">
+                                                <span className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-sm font-bold group-hover:bg-blue-600 group-hover:text-white group-hover:scale-110 transition-all duration-300">3</span>
+                                                <span className="text-sm text-gray-700">Migre orçamento de CPM alto</span>
+                                            </li>
+                                        </ol>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Performance */}
+                        {activeTab === 'performance' && (
+                            <div className="space-y-8">
+                                <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-300 scale-on-hover glow-card">
+                                    <h3 className="text-lg font-bold text-gray-900 mb-6">📈 Impressões e Alcance por Hora</h3>
+                                    <ResponsiveContainer width="100%" height={350}>
+                                        <BarChart data={horaData}>
+                                            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                                            <XAxis dataKey="hora" stroke="#9ca3af" />
+                                            <YAxis stroke="#9ca3af" />
+                                            <Tooltip formatter={(value) => value.toLocaleString()} />
+                                            <Legend />
+                                            <Bar dataKey="impressoes" fill="#3b82f6" radius={[8, 8, 0, 0]} />
+                                            <Bar dataKey="alcance" fill="#ec4899" radius={[8, 8, 0, 0]} />
+                                        </BarChart>
+                                    </ResponsiveContainer>
+                                </div>
+
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                    <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-300 scale-on-hover glow-card">
+                                        <h3 className="text-lg font-bold text-gray-900 mb-6">👥 Por Faixa Etária</h3>
+                                        <ResponsiveContainer width="100%" height={300}>
+                                            <BarChart data={idadeData}>
+                                                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                                                <XAxis dataKey="faixa" stroke="#9ca3af" />
+                                                <YAxis stroke="#9ca3af" />
+                                                <Tooltip formatter={(value) => value.toLocaleString()} />
+                                                <Bar dataKey="impressoes" fill="#8b5cf6" radius={[8, 8, 0, 0]} />
+                                            </BarChart>
+                                        </ResponsiveContainer>
+                                    </div>
+
+                                    <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-300 scale-on-hover glow-card">
+                                        <h3 className="text-lg font-bold text-gray-900 mb-6">👨‍👩 Por Gênero</h3>
+                                        <ResponsiveContainer width="100%" height={300}>
+                                            <PieChart>
+                                                <Pie
+                                                    data={generoData}
+                                                    cx="50%"
+                                                    cy="50%"
+                                                    labelLine={false}
+                                                    label={({ nome, impressoes }) => `${nome}: ${(impressoes / 1000).toFixed(1)}k`}
+                                                    outerRadius={80}
+                                                    fill="#8884d8"
+                                                    dataKey="impressoes"
+                                                >
+                                                    {generoData.map((entry, index) => (
+                                                        <Cell key={`cell-${index}`} fill={entry.fill} />
+                                                    ))}
+                                                </Pie>
+                                                <Tooltip formatter={(value) => value.toLocaleString()} />
+                                            </PieChart>
+                                        </ResponsiveContainer>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Campanhas */}
+                        {activeTab === 'campanhas' && (
+                            <div className="space-y-6">
+                                <h2 className="text-2xl font-bold text-gray-900">Campanhas em Destaque</h2>
+                                <div className="grid gap-4">
+                                    {campanhas.map((camp, idx) => (
+                                        <div key={idx} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-300 scale-on-hover glow-card cursor-pointer group">
+                                            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                                                <div>
+                                                    <p className="text-sm text-gray-500 font-medium mb-1">Campanha</p>
+                                                    <p className="font-semibold text-gray-900 group-hover:text-purple-600 transition-colors">{camp.nome}</p>
+                                                </div>
+                                                <div className="group-hover:scale-110 transition-transform duration-300">
+                                                    <p className="text-sm text-gray-500 font-medium mb-1">Resultados</p>
+                                                    <p className="font-bold text-blue-600 text-lg">{camp.resultado}</p>
+                                                </div>
+                                                <div className="group-hover:scale-110 transition-transform duration-300">
+                                                    <p className="text-sm text-gray-500 font-medium mb-1">Custo/Resultado</p>
+                                                    <p className="font-bold text-gray-900">R$ {camp.valor.toFixed(2)}</p>
+                                                </div>
+                                                <div className="group-hover:scale-110 transition-transform duration-300">
+                                                    <p className="text-sm text-gray-500 font-medium mb-1">CPC</p>
+                                                    <p className="font-bold text-gray-900">R$ {camp.cpc.toFixed(2)}</p>
+                                                </div>
+                                                <div className="group-hover:scale-110 transition-transform duration-300">
+                                                    <p className="text-sm text-gray-500 font-medium mb-1">CPM</p>
+                                                    <p className="font-bold text-gray-900">R$ {camp.cpm.toFixed(2)}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Regiões */}
+                        {activeTab === 'regioes' && (
+                            <div className="space-y-6">
+                                <h2 className="text-2xl font-bold text-gray-900">Desempenho por Região</h2>
+                                
+                                <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-300 scale-on-hover glow-card">
+                                    <ResponsiveContainer width="100%" height={350}>
+                                        <BarChart data={regiaoData}>
+                                            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                                            <XAxis dataKey="nome" stroke="#9ca3af" angle={-45} textAnchor="end" height={100} />
+                                            <YAxis stroke="#9ca3af" />
+                                            <Tooltip formatter={(value) => value.toLocaleString()} />
+                                            <Legend />
+                                            <Bar dataKey="impressoes" fill="#3b82f6" radius={[8, 8, 0, 0]} />
+                                            <Bar dataKey="alcance" fill="#ec4899" radius={[8, 8, 0, 0]} />
+                                        </BarChart>
+                                    </ResponsiveContainer>
+                                </div>
+
+                                <div className="grid gap-4">
+                                    {regiaoData.map((regiao, idx) => (
+                                        <div key={idx} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-300 scale-on-hover glow-card">
+                                            <div className="flex items-center justify-between mb-4 group">
+                                                <h3 className="text-lg font-bold text-gray-900 group-hover:text-purple-600 transition-colors">{regiao.nome}</h3>
+                                                <span className="text-2xl font-bold text-blue-600 group-hover:scale-110 transition-transform duration-300">{regiao.alcance.toLocaleString()}</span>
+                                            </div>
+                                            <div className="grid grid-cols-3 gap-4">
+                                                <div className="hover:scale-110 transition-transform duration-300">
+                                                    <p className="text-sm text-gray-500 font-medium">Impressões</p>
+                                                    <p className="text-xl font-bold text-gray-900">{regiao.impressoes.toLocaleString()}</p>
+                                                </div>
+                                                <div className="hover:scale-110 transition-transform duration-300">
+                                                    <p className="text-sm text-gray-500 font-medium">CPM</p>
+                                                    <p className="text-xl font-bold text-gray-900">R$ {regiao.cpf.toFixed(2)}</p>
+                                                </div>
+                                                <div className="hover:scale-110 transition-transform duration-300">
+                                                    <p className="text-sm text-gray-500 font-medium">% do Total</p>
+                                                    <p className="text-xl font-bold text-gray-900">{((regiao.alcance / 51214) * 100).toFixed(1)}%</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </main>
+
+                    {/* Footer */}
+                    <footer className="bg-gray-50 border-t border-gray-200 mt-16">
+                        <div className="max-w-7xl mx-auto px-6 py-8">
+                            <p className="text-center text-gray-500 text-sm">
+                                Relatório gerado em <strong>Meta Ads Manager</strong> • Período: 19 de junho a 25 de junho de 2026
+                            </p>
+                        </div>
+                    </footer>
+                </div>
+            );
+        }
+
+        ReactDOM.createRoot(document.getElementById('root')).render(<RelatoriAmorinha />);
+    </script>
+</body>
+</html>
